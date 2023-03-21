@@ -8,4 +8,6 @@ find_package(libcmaes REQUIRED)
 find_package(mc_mujoco REQUIRED)
 find_package(Boost REQUIRED COMPONENTS program_options)
 
+add_subdirectory(src)
+
 install(CODE "message(\"Nothing to install yet\")")
