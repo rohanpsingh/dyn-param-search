@@ -11,6 +11,8 @@ static std::mutex MTX;
 static std::string main_robot;
 static double best_score = std::numeric_limits<double>::infinity();
 
+bool render = false;
+
 static std::unique_ptr<mc_mujoco::MjSim> make_sim()
 {
   boost::filesystem::path temp_conf = boost::filesystem::unique_path("/tmp/dyn-param-search-%%%%-%%%%-%%%%-%%%%.yaml");
@@ -30,7 +32,10 @@ static std::unique_ptr<mc_mujoco::MjSim> make_sim()
   }
 
   mc_mujoco::MjConfiguration mj_config;
-  mj_config.with_visualization = false;
+  if(!render)
+  {
+    mj_config.with_visualization = false;
+  }
   mj_config.mc_config = temp_conf.string();
 
   auto sim = std::make_unique<mc_mujoco::MjSim>(mj_config);
@@ -72,32 +77,31 @@ double run(const double * value)
     auto mj_sim = get_sim();
     auto & gc = *mj_sim->controller();
     auto & controller = gc.controller();
-    /*
-    controller.config().add("autoplay", true);
-    if(!controller.config().has("autoplay_plans"))
-    {
-      controller.config().add("autoplay_plans", std::vector<std::string>({"ashibumi"}));
-    }
-    */
+
+    auto model = mj_sim->model();
+    auto data = mj_sim->data();
 
     // Step once to start the controller
     mj_sim->stepSimulation();
+
+    double wallclock = 0;
+    double play_until = 5;
     bool done = false;
     while(!done)
     {
+      if (render)
+      {
+        mj_sim->updateScene();
+        mj_sim->render();
+      }
       mj_sim->stepSimulation();
-      wallclock += 0.02;
-      if (wallclock > 5)
+      wallclock += model.opt.timestep;
+      if (wallclock > play_until)
       {
         done = true;
       }
     }
 
-    //controller.datastore().clear();
-
-    auto & robot = controller.robot();
-    auto & real = controller.realRobot();
-    real.posW(robot.bodySensor("FloatingBase").position());
 
     auto lf_error = sva::transformError(robot.surfacePose("LeftFoot"), real.surfacePose("LeftFoot"));
     auto rf_error = sva::transformError(robot.surfacePose("RightFoot"), real.surfacePose("RightFoot"));

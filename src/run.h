@@ -22,6 +22,4 @@ void mute_mc_rtc();
 
 /** Restore mc_rtc outputs */
 void unmute_mc_rtc();
-
-static double wallclock = 0;
 } // namespace optimizer
