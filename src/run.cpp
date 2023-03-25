@@ -84,30 +84,36 @@ double run(const double * value)
     // Step once to start the controller
     mj_sim->stepSimulation();
 
+    double d = 10*(value[0] + value[1]);
+    for (unsigned int j = 0; j < 3; ++j)
+    {
+      model.dof_damping[j] = d;
+    }
+
     double wallclock = 0;
-    double play_until = 5;
+    double play_until = 2;
     bool done = false;
+    int counter = 0;
     while(!done)
     {
-      if (render)
+      if (render && (counter % 20)==0)
       {
         mj_sim->updateScene();
         mj_sim->render();
       }
       mj_sim->stepSimulation();
       wallclock += model.opt.timestep;
+      counter++;
       if (wallclock > play_until)
       {
         done = true;
       }
     }
 
-
-    auto lf_error = sva::transformError(robot.surfacePose("LeftFoot"), real.surfacePose("LeftFoot"));
-    auto rf_error = sva::transformError(robot.surfacePose("RightFoot"), real.surfacePose("RightFoot"));
+    //std::cout << "Value: (" << value[0] << ", " << value[1] << "). Body pos: "<< data.qpos[0] << std::endl;
 
     std::unique_lock<std::mutex> lock(MTX);
-    double score = lf_error.vector().norm() + rf_error.vector().norm();
+    double score = data.qpos[0];
     if(score < best_score)
     {
       best_score = score;
