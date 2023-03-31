@@ -13,6 +13,9 @@ static double best_score = std::numeric_limits<double>::infinity();
 
 bool render = false;
 
+std::map<std::string, std::vector<double>> init_qs_;
+std::map<std::string, sva::PTransformd> init_pos_;
+
 static std::unique_ptr<mc_mujoco::MjSim> make_sim()
 {
   boost::filesystem::path temp_conf = boost::filesystem::unique_path("/tmp/dyn-param-search-%%%%-%%%%-%%%%-%%%%.yaml");
@@ -40,6 +43,16 @@ static std::unique_ptr<mc_mujoco::MjSim> make_sim()
 
   auto sim = std::make_unique<mc_mujoco::MjSim>(mj_config);
   boost::filesystem::remove(temp_conf);
+
+  // populate init q and pos
+  auto & gc = *sim->controller();
+  auto & controller = gc.controller();
+  std::string rname = controller.robot().name();
+  for(const auto & r : controller.robots())
+  {
+    init_qs_[r.name()] = controller.robot(r.name()).encoderValues();
+    init_pos_[r.name()] = controller.robot(r.name()).posW();
+  }
   return sim;
 }
 
@@ -59,7 +72,7 @@ static std::unique_ptr<mc_mujoco::MjSim> get_sim()
     auto * sim = pool.back().release();
     pool.erase(pool.begin() + (pool.size() - 1));
     lock.unlock();
-    sim->resetSimulation();
+    sim->resetSimulation(init_qs_, init_pos_);
     return std::unique_ptr<mc_mujoco::MjSim>(sim);
   }
 }
