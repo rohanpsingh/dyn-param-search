@@ -27,7 +27,7 @@ static std::unique_ptr<mc_mujoco::MjSim> make_sim()
     config.add("IncludeHalfSitController", false);
     config.add("Log", false);
     config.add("GUIServer").add("Enable", false);
-    config.add("Enabled", "GraspFSM");
+    config.add("Enabled", "WalkerPolicy");
     config.save(temp_conf.string());
   }
 
@@ -84,18 +84,23 @@ double run(const double * value)
     // Step once to start the controller
     mj_sim->stepSimulation();
 
+    /*
     double d = 10*(value[0] + value[1]);
     for (unsigned int j = 0; j < 3; ++j)
     {
       model.dof_damping[j] = d;
     }
+    */
 
     double wallclock = 0;
-    double play_until = 2;
     bool done = false;
     int counter = 0;
     while(!done)
     {
+      if(controller.datastore().has("DONE"))
+      {
+        done = controller.datastore().get<bool>("DONE");
+      }
       if (render && (counter % 20)==0)
       {
         mj_sim->updateScene();
@@ -104,16 +109,12 @@ double run(const double * value)
       mj_sim->stepSimulation();
       wallclock += model.opt.timestep;
       counter++;
-      if (wallclock > play_until)
-      {
-        done = true;
-      }
     }
 
     //std::cout << "Value: (" << value[0] << ", " << value[1] << "). Body pos: "<< data.qpos[0] << std::endl;
 
     std::unique_lock<std::mutex> lock(MTX);
-    double score = data.qpos[0];
+    double score = controller.datastore().get<double>("Score");
     if(score < best_score)
     {
       best_score = score;
