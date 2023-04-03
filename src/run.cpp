@@ -16,6 +16,8 @@ bool render = false;
 std::map<std::string, std::vector<double>> init_qs_;
 std::map<std::string, sva::PTransformd> init_pos_;
 
+std::vector<std::vector<double>> traj_data;
+
 static std::unique_ptr<mc_mujoco::MjSim> make_sim()
 {
   boost::filesystem::path temp_conf = boost::filesystem::unique_path("/tmp/dyn-param-search-%%%%-%%%%-%%%%-%%%%.yaml");
@@ -43,6 +45,10 @@ static std::unique_ptr<mc_mujoco::MjSim> make_sim()
 
   auto sim = std::make_unique<mc_mujoco::MjSim>(mj_config);
   boost::filesystem::remove(temp_conf);
+
+  // parse trajectory file
+  const std::string path_to_traj = "/tmp/ActionTrajectory.csv";
+  parser::parseTrajectoryFile(path_to_traj, 12, traj_data);
 
   // populate init q and pos
   auto & gc = *sim->controller();

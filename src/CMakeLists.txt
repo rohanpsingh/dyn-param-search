@@ -2,6 +2,8 @@ set(run_sources
   run.cpp
   run.h
   variables.h
+  parser.cpp
+  parser.h
 )
 
 add_library(run_function OBJECT ${run_sources})

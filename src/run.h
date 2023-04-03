@@ -1,6 +1,7 @@
 #pragma once
 
 #include "variables.h"
+#include "parser.h"
 
 namespace optimizer
 {
