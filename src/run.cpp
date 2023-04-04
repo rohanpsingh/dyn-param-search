@@ -114,11 +114,13 @@ double run(const double * value)
     double wallclock = 0;
     bool done = false;
     int counter = 0;
+
+    std::vector<std::vector<double>> state_buffer;
     while(!done)
     {
-      if(controller.datastore().has("DONE"))
+      if(controller.datastore().has("AUTOPLAY_FINISH"))
       {
-        done = controller.datastore().get<bool>("DONE");
+        done = controller.datastore().get<bool>("AUTOPLAY_FINISH");
       }
       if (render && (counter % 20)==0)
       {
@@ -126,6 +128,15 @@ double run(const double * value)
         mj_sim->render();
       }
       mj_sim->stepSimulation();
+
+      if(controller.datastore().has("AUTOPLAY_FINISH") && ((counter+1)%2==0))
+      {
+        auto v = controller.datastore().get<std::vector<double>>("AUTOPLAY_BUFFER");
+        if (v.size())
+        {
+          state_buffer.push_back(v);
+        }
+      }
       wallclock += model.opt.timestep;
       counter++;
     }
@@ -133,7 +144,16 @@ double run(const double * value)
     //std::cout << "Value: (" << value[0] << ", " << value[1] << "). Body pos: "<< data.qpos[0] << std::endl;
 
     std::unique_lock<std::mutex> lock(MTX);
-    double score = controller.datastore().get<double>("Score");
+
+    double score = 0;
+    for (unsigned int i = 0; i < traj_data.size(); ++i)
+    {
+      auto v1 = traj_data[i];
+      auto v2 = state_buffer[i];
+      score += (euclideanNorm(v1, v2));
+    }
+
+    std::cout << "Value: (" << value[0] << ", " << value[1] << "). Score: " << score << std::endl;
     if(score < best_score)
     {
       best_score = score;
@@ -180,5 +200,24 @@ void unmute_mc_rtc()
   mc_rtc::log::details::info().set_level(spdlog::level::debug);
   mc_rtc::log::details::cerr().set_level(spdlog::level::debug);
 }
+
+double euclideanNorm(std::vector<double> v1, std::vector<double> v2)
+{
+  if (v1.size() != v2.size())
+  {
+    throw std::runtime_error("Vectors must have the same size");
+  }
+  std::vector<double> diff(v1.size());
+  for (int i = 0; i < v1.size(); i++)
+  {
+    diff[i] = v1[i] - v2[i];
+  }
+  double norm = 0.0;
+  for (int i = 0; i < diff.size(); i++)
+  {
+    norm += pow(diff[i], 2);
+  }
+  return sqrt(norm);
+};
 
 } // namespace optimizer

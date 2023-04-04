@@ -3,6 +3,8 @@
 #include "variables.h"
 #include "parser.h"
 
+#include <cmath>
+
 namespace optimizer
 {
 
@@ -23,4 +25,6 @@ void mute_mc_rtc();
 
 /** Restore mc_rtc outputs */
 void unmute_mc_rtc();
+
+double euclideanNorm(std::vector<double> v1, std::vector<double> v2);
 } // namespace optimizer
