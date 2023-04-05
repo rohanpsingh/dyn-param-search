@@ -47,7 +47,7 @@ static std::unique_ptr<mc_mujoco::MjSim> make_sim()
   boost::filesystem::remove(temp_conf);
 
   // parse trajectory file
-  const std::string path_to_traj = "/tmp/ActionTrajectory.csv";
+  const std::string path_to_traj = "/tmp/StateTrajectory.csv";
   parser::parseTrajectoryFile(path_to_traj, 12, traj_data);
 
   // populate init q and pos
@@ -103,13 +103,18 @@ double run(const double * value)
     // Step once to start the controller
     mj_sim->stepSimulation();
 
-    /*
-    double d = 10*(value[0] + value[1]);
-    for (unsigned int j = 0; j < 3; ++j)
+    unsigned int dof = 6;
+    for (unsigned int j = 0; j < 12; ++j)
     {
-      model.dof_damping[j] = d;
+      model.dof_damping[dof] = 10*value[j];
+      dof++;
     }
-    */
+    dof = 6;
+    for (unsigned int j = 12; j < 24; ++j)
+    {
+      model.dof_frictionloss[dof] = 10*value[j];
+      dof++;
+    }
 
     double wallclock = 0;
     bool done = false;
@@ -141,7 +146,10 @@ double run(const double * value)
       counter++;
     }
 
-    //std::cout << "Value: (" << value[0] << ", " << value[1] << "). Body pos: "<< data.qpos[0] << std::endl;
+    if(state_buffer.size()!=traj_data.size())
+    {
+      throw std::runtime_error("Trajectory data must have the same size");
+    }
 
     std::unique_lock<std::mutex> lock(MTX);
 
@@ -153,7 +161,13 @@ double run(const double * value)
       score += (euclideanNorm(v1, v2));
     }
 
-    std::cout << "Value: (" << value[0] << ", " << value[1] << "). Score: " << score << std::endl;
+    std::cout << "Value: (";
+    for (unsigned int i = 0; i < variables.size(); ++i)
+    {
+      std::cout << value[i] << ",";
+    }
+    std::cout << "). Score: " << score << std::endl;
+
     if(score < best_score)
     {
       best_score = score;
@@ -173,7 +187,8 @@ double run(const double * value)
 
 std::array<double, variables.size()> get_x0()
 {
-  std::array<double, variables.size()> x0 = {};
+  std::array<double, variables.size()> x0;
+  x0.fill(0.5);
   return x0;
 }
 
