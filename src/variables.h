@@ -5,14 +5,14 @@
 
 #include <mc_mujoco/mj_sim.h>
 
-const std::string robot_prefix = "hrp5_p_";
-const std::vector<std::string> mj_body_names = {
+static inline const std::string robot_prefix = "hrp5_p_";
+static inline const std::vector<std::string> mj_body_names = {
   "Body",
   "Rleg_Link0", "Rleg_Link1", "Rleg_Link2", "Rleg_Link3", "Rleg_Link4", "Rleg_Link5",
   "Lleg_Link0", "Lleg_Link1", "Lleg_Link2", "Lleg_Link3", "Lleg_Link4", "Lleg_Link5",
   "Chest_Link2",
 };
-const std::vector<std::string> mj_motor_names = {
+static inline const std::vector<std::string> mj_motor_names = {
   "RCY_motor", "RCR_motor", "RCP_motor", "RKP_motor", "RAP_motor", "RAR_motor",
   "LCY_motor", "LCR_motor", "LCP_motor", "LKP_motor", "LAP_motor", "LAR_motor",
 };
@@ -47,6 +47,9 @@ enum class Variables
   MASS_LLEG_LINK4,
   MASS_LLEG_LINK5,
   MASS_CHEST_LINK2,
+  POS_CHEST_LINK2_X,
+  POS_CHEST_LINK2_Y,
+  POS_CHEST_LINK2_Z,
 };
 
 struct VariableBound
@@ -88,6 +91,9 @@ static inline VariableBounds bounds_from_safety()
     {Variables::MASS_LLEG_LINK4, {0.8, 2}},
     {Variables::MASS_LLEG_LINK5, {1, 2}},
     {Variables::MASS_CHEST_LINK2, {20, 28}},
+    {Variables::POS_CHEST_LINK2_X, {-0.2, -0.1}},
+    {Variables::POS_CHEST_LINK2_Y, {-0.05, 0.05}},
+    {Variables::POS_CHEST_LINK2_Z, {0.2, 0.3}},
   };
 }
 
@@ -121,6 +127,9 @@ static inline const std::array variables{
   Variables::MASS_LLEG_LINK4,
   Variables::MASS_LLEG_LINK5,
   Variables::MASS_CHEST_LINK2,
+  Variables::POS_CHEST_LINK2_X,
+  Variables::POS_CHEST_LINK2_Y,
+  Variables::POS_CHEST_LINK2_Z,
 };
 
 static inline void model_to_value(const mjModel & model, double * value)
@@ -132,13 +141,19 @@ static inline void model_to_value(const mjModel & model, double * value)
     value[i] = 0;
   }
   unsigned int k = 0;
-  for (unsigned int i = 14; i < variables.size(); ++i)
+  for (unsigned int i = 14; i < 28; ++i)
   {
     std::string body_name = robot_prefix + mj_body_names[k];
     unsigned int body_id = mj_name2id(&model, mjOBJ_BODY, body_name.c_str());
     value[i] = model.body_mass[body_id];
     k++;
   }
+
+  std::string chest_body_name = robot_prefix + "Chest_Link2";
+  unsigned int chest_body_id = mj_name2id(&model, mjOBJ_BODY, chest_body_name.c_str());
+  value[28] = model.body_ipos[3*chest_body_id + 0];
+  value[29] = model.body_ipos[3*chest_body_id + 1];
+  value[30] = model.body_ipos[3*chest_body_id + 2];
 }
 
 static inline void value_to_model(const double * value, mjModel & model)
@@ -157,11 +172,17 @@ static inline void value_to_model(const double * value, mjModel & model)
     k++;
   }
   k = 0;
-  for (unsigned int i = 14; i < variables.size(); ++i)
+  for (unsigned int i = 14; i < 28; ++i)
   {
     std::string body_name = robot_prefix + mj_body_names[k];
     unsigned int body_id = mj_name2id(&model, mjOBJ_BODY, body_name.c_str());
     model.body_mass[body_id] = value[i];
     k++;
   }
+
+  std::string chest_body_name = robot_prefix + "Chest_Link2";
+  unsigned int chest_body_id = mj_name2id(&model, mjOBJ_BODY, chest_body_name.c_str());
+  model.body_ipos[3*chest_body_id + 0] = value[28];
+  model.body_ipos[3*chest_body_id + 1] = value[29];
+  model.body_ipos[3*chest_body_id + 2] = value[30];
 }
