@@ -103,23 +103,11 @@ double run(const double * value)
     // Step once to start the controller
     mj_sim->stepSimulation();
 
-    unsigned int dof = 6;
-    for (unsigned int j = 0; j < 12; ++j)
-    {
-      model.dof_damping[dof] = 10*value[j];
-      dof++;
-    }
-    dof = 6;
-    for (unsigned int j = 12; j < 24; ++j)
-    {
-      model.dof_frictionloss[dof] = 10*value[j];
-      dof++;
-    }
+    value_to_model(value, model);
 
     double wallclock = 0;
     bool done = false;
     int counter = 0;
-
     std::vector<std::vector<double>> state_buffer;
     while(!done)
     {
@@ -188,7 +176,9 @@ double run(const double * value)
 std::array<double, variables.size()> get_x0()
 {
   std::array<double, variables.size()> x0;
-  x0.fill(0.5);
+  auto mj_sim = get_sim();
+  auto model = mj_sim->model();
+  model_to_value(model, x0.data());
   return x0;
 }
 
