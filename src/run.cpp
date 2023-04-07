@@ -148,6 +148,7 @@ double run(const double * value)
       auto v2 = state_buffer[i];
       score += (euclideanNorm(v1, v2));
     }
+    score /= traj_data.size();
 
     std::cout << "Value: (";
     for (unsigned int i = 0; i < variables.size(); ++i)
