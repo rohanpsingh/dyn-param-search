@@ -160,6 +160,18 @@ double run(const double * value)
     {
       best_score = score;
       std::cout << "new best score: " << score << "\n";
+
+      {
+        auto v1 = traj_data[traj_data.size()-1];
+        auto v2 = state_buffer[traj_data.size()-1];
+        for (unsigned int i = 0; i < v1.size(); ++i)
+        {
+          std::cout << i << ": " << v1[i] << "," << v2[i];
+          std::cout << "\t(diff=" << (v1[i] - v2[i]) << ")" << std::endl;
+        }
+        std::cout << "Norm:" << euclideanNorm(v1, v2) << std::endl;
+      }
+      std::cout << std::endl;
     }
     lock.unlock();
 
