@@ -7,30 +7,21 @@
 
 enum class Variables
 {
-  DUMMY_PARAM_01,
-  DUMMY_PARAM_02,
-  DUMMY_PARAM_03,
-  DUMMY_PARAM_04,
-  DUMMY_PARAM_05,
-  DUMMY_PARAM_06,
-  DUMMY_PARAM_07,
-  DUMMY_PARAM_08,
-  DUMMY_PARAM_09,
-  DUMMY_PARAM_10,
-  DUMMY_PARAM_11,
-  DUMMY_PARAM_12,
-  DUMMY_PARAM_13,
-  DUMMY_PARAM_14,
-  DUMMY_PARAM_15,
-  DUMMY_PARAM_16,
-  DUMMY_PARAM_17,
-  DUMMY_PARAM_18,
-  DUMMY_PARAM_19,
-  DUMMY_PARAM_20,
-  DUMMY_PARAM_21,
-  DUMMY_PARAM_22,
-  DUMMY_PARAM_23,
-  DUMMY_PARAM_24,
+  MOT_DAMPING,
+  MOT_FRICTIONLOSS,
+  MASS_BODY_LINK,
+  MASS_RLEG_LINK0,
+  MASS_RLEG_LINK1,
+  MASS_RLEG_LINK2,
+  MASS_RLEG_LINK3,
+  MASS_RLEG_LINK4,
+  MASS_RLEG_LINK5,
+  MASS_LLEG_LINK0,
+  MASS_LLEG_LINK1,
+  MASS_LLEG_LINK2,
+  MASS_LLEG_LINK3,
+  MASS_LLEG_LINK4,
+  MASS_LLEG_LINK5,
 };
 
 struct VariableBound
@@ -44,66 +35,48 @@ using VariableBounds = std::unordered_map<Variables, VariableBound>;
 static inline VariableBounds bounds_from_safety()
 {
   return {
-    {Variables::DUMMY_PARAM_01, {0, 10}},
-    {Variables::DUMMY_PARAM_02, {0, 10}},
-    {Variables::DUMMY_PARAM_03, {9, 10}},
-    {Variables::DUMMY_PARAM_04, {2, 3}},
-    {Variables::DUMMY_PARAM_05, {1, 2}},
-    {Variables::DUMMY_PARAM_06, {6, 7}},
-    {Variables::DUMMY_PARAM_07, {2.8, 4}},
-    {Variables::DUMMY_PARAM_08, {0.8, 2}},
-    {Variables::DUMMY_PARAM_09, {1, 2}},
-    {Variables::DUMMY_PARAM_10, {2, 3}},
-    {Variables::DUMMY_PARAM_11, {1, 2}},
-    {Variables::DUMMY_PARAM_12, {6, 7}},
-    {Variables::DUMMY_PARAM_13, {2.8, 4}},
-    {Variables::DUMMY_PARAM_14, {0.8, 2}},
-    {Variables::DUMMY_PARAM_15, {1, 2}},
-    {Variables::DUMMY_PARAM_16, {.0, 1}},
-    {Variables::DUMMY_PARAM_17, {.0, 1}},
-    {Variables::DUMMY_PARAM_18, {.0, 1}},
-    {Variables::DUMMY_PARAM_19, {.0, 1}},
-    {Variables::DUMMY_PARAM_20, {.0, 1}},
-    {Variables::DUMMY_PARAM_21, {.0, 1}},
-    {Variables::DUMMY_PARAM_22, {.0, 1}},
-    {Variables::DUMMY_PARAM_23, {.0, 1}},
-    {Variables::DUMMY_PARAM_24, {.0, 1}},
+    {Variables::MOT_DAMPING, {0, 10}},
+    {Variables::MOT_FRICTIONLOSS, {0, 10}},
+    {Variables::MASS_BODY_LINK, {9, 10}},
+    {Variables::MASS_RLEG_LINK0, {2, 3}},
+    {Variables::MASS_RLEG_LINK1, {1, 2}},
+    {Variables::MASS_RLEG_LINK2, {6, 7}},
+    {Variables::MASS_RLEG_LINK3, {2.8, 4}},
+    {Variables::MASS_RLEG_LINK4, {0.8, 2}},
+    {Variables::MASS_RLEG_LINK5, {1, 2}},
+    {Variables::MASS_LLEG_LINK0, {2, 3}},
+    {Variables::MASS_LLEG_LINK1, {1, 2}},
+    {Variables::MASS_LLEG_LINK2, {6, 7}},
+    {Variables::MASS_LLEG_LINK3, {2.8, 4}},
+    {Variables::MASS_LLEG_LINK4, {0.8, 2}},
+    {Variables::MASS_LLEG_LINK5, {1, 2}},
   };
 }
 
 /** Only the variables that appear in this array are considered for optimization */
 static inline const std::array variables{
-  Variables::DUMMY_PARAM_01,
-  Variables::DUMMY_PARAM_02,
-  Variables::DUMMY_PARAM_03,
-  Variables::DUMMY_PARAM_04,
-  Variables::DUMMY_PARAM_05,
-  Variables::DUMMY_PARAM_06,
-  Variables::DUMMY_PARAM_07,
-  Variables::DUMMY_PARAM_08,
-  Variables::DUMMY_PARAM_09,
-  Variables::DUMMY_PARAM_10,
-  Variables::DUMMY_PARAM_11,
-  Variables::DUMMY_PARAM_12,
-  Variables::DUMMY_PARAM_13,
-  Variables::DUMMY_PARAM_14,
-  Variables::DUMMY_PARAM_15,
-  /* Variables::DUMMY_PARAM_16, */
-  /* Variables::DUMMY_PARAM_17, */
-  /* Variables::DUMMY_PARAM_18, */
-  /* Variables::DUMMY_PARAM_19, */
-  /* Variables::DUMMY_PARAM_20, */
-  /* Variables::DUMMY_PARAM_21, */
-  /* Variables::DUMMY_PARAM_22, */
-  /* Variables::DUMMY_PARAM_23, */
-  /* Variables::DUMMY_PARAM_24, */
+  Variables::MOT_DAMPING,
+  Variables::MOT_FRICTIONLOSS,
+  Variables::MASS_BODY_LINK,
+  Variables::MASS_RLEG_LINK0,
+  Variables::MASS_RLEG_LINK1,
+  Variables::MASS_RLEG_LINK2,
+  Variables::MASS_RLEG_LINK3,
+  Variables::MASS_RLEG_LINK4,
+  Variables::MASS_RLEG_LINK5,
+  Variables::MASS_LLEG_LINK0,
+  Variables::MASS_LLEG_LINK1,
+  Variables::MASS_LLEG_LINK2,
+  Variables::MASS_LLEG_LINK3,
+  Variables::MASS_LLEG_LINK4,
+  Variables::MASS_LLEG_LINK5,
 };
 
 static inline void model_to_value(const mjModel & model, double * value)
 {
   value[0] = 5;
   value[1] = 5 ;
-  unsigned int body_id = 2; // corresponds to the root body
+  unsigned int body_id = 2;
   for (unsigned int i = 2; i < variables.size(); ++i)
   {
     value[i] = model.body_mass[body_id];
