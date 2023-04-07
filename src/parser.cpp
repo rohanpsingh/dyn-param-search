@@ -3,9 +3,9 @@
 namespace parser
 {
 
-void parseTrajectoryFile(const std::string & path, const int & rowsize, std::vector<std::vector<double>> & data)
+std::vector<std::vector<double>> parseTrajectoryFile(const std::string & path, const int & rowsize)
 {
-  data.clear();
+  std::vector<std::vector<double>> data;
   std::ifstream strm(path.c_str());
   if(!strm.is_open())
   {
@@ -36,6 +36,6 @@ void parseTrajectoryFile(const std::string & path, const int & rowsize, std::vec
     }
     data.push_back(row);
   }
+  return data;
 }
-
 }

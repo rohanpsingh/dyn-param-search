@@ -48,7 +48,7 @@ static std::unique_ptr<mc_mujoco::MjSim> make_sim()
 
   // parse trajectory file
   const std::string path_to_traj = "/tmp/StateTrajectory.csv";
-  parser::parseTrajectoryFile(path_to_traj, 12, traj_data);
+  traj_data = parser::parseTrajectoryFile(path_to_traj, 12);
 
   // populate init q and pos
   auto & gc = *sim->controller();

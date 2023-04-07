@@ -6,6 +6,6 @@
 
 namespace parser
 {
-void parseTrajectoryFile(const std::string & path, const int & rowsize, std::vector<std::vector<double>> & data);
+std::vector<std::vector<double>> parseTrajectoryFile(const std::string & path, const int & rowsize);
 }
 
