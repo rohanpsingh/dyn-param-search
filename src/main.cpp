@@ -95,6 +95,7 @@ int main(int argc, char * argv[])
   std::cout << "Optimization time: " << cmasols.elapsed_time() / 1000.0 << " seconds\n";
   std::cout << "Evaluations: " << cmasols.fevals() << "\n";
   std::cout << "Final params: " << params.transpose() << std::endl;
+  std::cout << "Best score: " << cmasols.get_best_seen_candidate().get_fvalue() << std::endl;
 
   return 0;
 }
