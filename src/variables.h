@@ -16,6 +16,10 @@ static inline const std::vector<std::string> mj_motor_names = {
   "RCY_motor", "RCR_motor", "RCP_motor", "RKP_motor", "RAP_motor", "RAR_motor",
   "LCY_motor", "LCR_motor", "LCP_motor", "LKP_motor", "LAP_motor", "LAR_motor",
 };
+static inline const std::vector<std::string> mj_dof_names = {
+  "RCY", "RCR", "RCP", "RKP", "RAP", "RAR",
+  "LCY", "LCR", "LCP", "LKP", "LAP", "LAR",
+};
 
 enum class Variables
 {
@@ -50,6 +54,18 @@ enum class Variables
   POS_CHEST_LINK2_X,
   POS_CHEST_LINK2_Y,
   POS_CHEST_LINK2_Z,
+  ARMATURE_DIFF_00,
+  ARMATURE_DIFF_01,
+  ARMATURE_DIFF_02,
+  ARMATURE_DIFF_03,
+  ARMATURE_DIFF_04,
+  ARMATURE_DIFF_05,
+  ARMATURE_DIFF_06,
+  ARMATURE_DIFF_07,
+  ARMATURE_DIFF_08,
+  ARMATURE_DIFF_09,
+  ARMATURE_DIFF_10,
+  ARMATURE_DIFF_11,
 };
 
 struct VariableBound
@@ -94,6 +110,18 @@ static inline VariableBounds bounds_from_safety()
     {Variables::POS_CHEST_LINK2_X, {-0.2, -0.1}},
     {Variables::POS_CHEST_LINK2_Y, {-0.05, 0.05}},
     {Variables::POS_CHEST_LINK2_Z, {0.2, 0.3}},
+    {Variables::ARMATURE_DIFF_00, {-0.002, 0.002}},
+    {Variables::ARMATURE_DIFF_01, {-0.002, 0.002}},
+    {Variables::ARMATURE_DIFF_02, {-0.002, 0.002}},
+    {Variables::ARMATURE_DIFF_03, {-0.002, 0.002}},
+    {Variables::ARMATURE_DIFF_04, {-0.002, 0.002}},
+    {Variables::ARMATURE_DIFF_05, {-0.002, 0.002}},
+    {Variables::ARMATURE_DIFF_06, {-0.002, 0.002}},
+    {Variables::ARMATURE_DIFF_07, {-0.002, 0.002}},
+    {Variables::ARMATURE_DIFF_08, {-0.002, 0.002}},
+    {Variables::ARMATURE_DIFF_09, {-0.002, 0.002}},
+    {Variables::ARMATURE_DIFF_10, {-0.002, 0.002}},
+    {Variables::ARMATURE_DIFF_11, {-0.002, 0.002}},
   };
 }
 
@@ -130,6 +158,18 @@ static inline const std::array variables{
   Variables::POS_CHEST_LINK2_X,
   Variables::POS_CHEST_LINK2_Y,
   Variables::POS_CHEST_LINK2_Z,
+  Variables::ARMATURE_DIFF_00,
+  Variables::ARMATURE_DIFF_01,
+  Variables::ARMATURE_DIFF_02,
+  Variables::ARMATURE_DIFF_03,
+  Variables::ARMATURE_DIFF_04,
+  Variables::ARMATURE_DIFF_05,
+  Variables::ARMATURE_DIFF_06,
+  Variables::ARMATURE_DIFF_07,
+  Variables::ARMATURE_DIFF_08,
+  Variables::ARMATURE_DIFF_09,
+  Variables::ARMATURE_DIFF_10,
+  Variables::ARMATURE_DIFF_11,
 };
 
 static inline void model_to_value(const mjModel & model, double * value)
@@ -154,6 +194,10 @@ static inline void model_to_value(const mjModel & model, double * value)
   value[28] = model.body_ipos[3*chest_body_id + 0];
   value[29] = model.body_ipos[3*chest_body_id + 1];
   value[30] = model.body_ipos[3*chest_body_id + 2];
+  for (unsigned int i = 31; i < 43; ++i)
+  {
+    value[i] = 0;
+  }
 }
 
 static inline void value_to_model(const double * value, mjModel & model)
@@ -185,4 +229,13 @@ static inline void value_to_model(const double * value, mjModel & model)
   model.body_ipos[3*chest_body_id + 0] = value[28];
   model.body_ipos[3*chest_body_id + 1] = value[29];
   model.body_ipos[3*chest_body_id + 2] = value[30];
+
+  k = 0;
+  for (unsigned int i = 31; i < 43; ++i)
+  {
+    std::string dof_name = robot_prefix + mj_dof_names[k];
+    unsigned int dof_id = mj_name2id(&model, mjOBJ_JOINT, dof_name.c_str());
+    model.dof_armature[dof_id] += value[i];
+    k++;
+  }
 }
