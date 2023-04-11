@@ -100,10 +100,11 @@ double run(const double * value)
     auto model = mj_sim->model();
     auto data = mj_sim->data();
 
+    // set simulation parameters
+    value_to_model(value, model);
+
     // Step once to start the controller
     mj_sim->stepSimulation();
-
-    value_to_model(value, model);
 
     double wallclock = 0;
     bool done = false;
