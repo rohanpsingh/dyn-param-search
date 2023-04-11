@@ -135,9 +135,16 @@ double run(const double * value)
       counter++;
     }
 
-    if(state_buffer.size()!=traj_data.size())
+    try
     {
-      throw std::runtime_error("Trajectory data must have the same size");
+      if(state_buffer.size()!=traj_data.size())
+      {
+        throw std::runtime_error("Trajectory data must have the same size");
+      }
+    }
+    catch(std::exception const& e)
+    {
+      std::cout << "Exception: " << e.what() << "\n";
     }
 
     std::unique_lock<std::mutex> lock(MTX);
