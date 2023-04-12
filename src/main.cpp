@@ -71,7 +71,7 @@ int main(int argc, char * argv[])
 
   if(run_once)
   {
-    optimizer::set_best_score(0.0);
+    //optimizer::set_best_score(0.0);
     auto start_t = std::chrono::high_resolution_clock::now();
     double score = optimizer::run(init.data());
     std::chrono::duration<double, std::milli> dt = std::chrono::high_resolution_clock::now() - start_t;
