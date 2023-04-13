@@ -159,14 +159,16 @@ static inline const std::array<Variant, 53> variables {
 
 static inline void model_to_value(const mjModel & model, double * value)
 {
-  value[0] = 5;
-  value[1] = 5;
-  for (unsigned int i = 2; i < 14; ++i)
+  for (unsigned int i = 0; i < 24; ++i)
   {
-    value[i] = 0;
+    value[i] = 3;
+  }
+  for (unsigned int i = 24; i < 36; ++i)
+  {
+    value[i] = 0.2;
   }
   unsigned int k = 0;
-  for (unsigned int i = 14; i < 28; ++i)
+  for (unsigned int i = 36; i < 50; ++i)
   {
     std::string body_name = robot_prefix + mj_body_names[k];
     unsigned int body_id = mj_name2id(&model, mjOBJ_BODY, body_name.c_str());
@@ -176,24 +178,31 @@ static inline void model_to_value(const mjModel & model, double * value)
 
   std::string chest_body_name = robot_prefix + "Chest_Link2";
   unsigned int chest_body_id = mj_name2id(&model, mjOBJ_BODY, chest_body_name.c_str());
-  value[28] = model.body_ipos[3*chest_body_id + 0];
-  value[29] = model.body_ipos[3*chest_body_id + 1];
-  value[30] = model.body_ipos[3*chest_body_id + 2];
-  for (unsigned int i = 31; i < 43; ++i)
-  {
-    value[i] = 0;
-  }
+  value[50] = model.body_ipos[3*chest_body_id + 0];
+  value[51] = model.body_ipos[3*chest_body_id + 1];
+  value[52] = model.body_ipos[3*chest_body_id + 2];
 }
 
 static inline void value_to_model(const double * value, mjModel & model)
 {
-  for (unsigned int d = 6; d < 18; ++d)
-  {
-    model.dof_damping[d] = value[0];
-    model.dof_frictionloss[d] = value[1];
-  }
   unsigned int k = 0;
-  for (unsigned int i = 2; i < 14; ++i)
+  for (unsigned int i = 0; i < 12; ++i)
+  {
+    std::string dof_name = robot_prefix + mj_dof_names[k];
+    unsigned int dof_id = mj_name2id(&model, mjOBJ_JOINT, dof_name.c_str());
+    model.dof_damping[dof_id] = value[i];
+    k++;
+  }
+  k = 0;
+  for (unsigned int i = 12; i < 24; ++i)
+  {
+    std::string dof_name = robot_prefix + mj_dof_names[k];
+    unsigned int dof_id = mj_name2id(&model, mjOBJ_JOINT, dof_name.c_str());
+    model.dof_frictionloss[dof_id] = value[i];
+    k++;
+  }
+  k = 0;
+  for (unsigned int i = 24; i < 36; ++i)
   {
     std::string mot_name = robot_prefix + mj_motor_names[k];
     unsigned int mot_id = mj_name2id(&model, mjOBJ_ACTUATOR, mot_name.c_str());
@@ -201,26 +210,17 @@ static inline void value_to_model(const double * value, mjModel & model)
     k++;
   }
   k = 0;
-  for (unsigned int i = 14; i < 28; ++i)
+  for (unsigned int i = 36; i < 50; ++i)
   {
     std::string body_name = robot_prefix + mj_body_names[k];
     unsigned int body_id = mj_name2id(&model, mjOBJ_BODY, body_name.c_str());
     model.body_mass[body_id] = value[i];
     k++;
   }
-
   std::string chest_body_name = robot_prefix + "Chest_Link2";
   unsigned int chest_body_id = mj_name2id(&model, mjOBJ_BODY, chest_body_name.c_str());
-  model.body_ipos[3*chest_body_id + 0] = value[28];
-  model.body_ipos[3*chest_body_id + 1] = value[29];
-  model.body_ipos[3*chest_body_id + 2] = value[30];
+  model.body_ipos[3*chest_body_id + 0] = value[50];
+  model.body_ipos[3*chest_body_id + 1] = value[51];
+  model.body_ipos[3*chest_body_id + 2] = value[52];
 
-  k = 0;
-  for (unsigned int i = 31; i < 43; ++i)
-  {
-    std::string dof_name = robot_prefix + mj_dof_names[k];
-    unsigned int dof_id = mj_name2id(&model, mjOBJ_JOINT, dof_name.c_str());
-    model.dof_armature[dof_id] += value[i];
-    k++;
-  }
 }
