@@ -62,63 +62,42 @@ using Variant = std::variant<
   Variables::DAMPING, Variables::FRICTIONLOSS, Variables::BEMF, Variables::MASS, Variables::COM_POS>;
 using VariableBounds = std::unordered_map<Variant, VariableBound>;
 
-static inline VariableBounds bounds_from_safety()
+static inline VariableBounds sanity_bounds()
 {
-  return {
-    {Variables::DAMPING::MOT_00, {0, 10}},
-    {Variables::DAMPING::MOT_01, {0, 10}},
-    {Variables::DAMPING::MOT_02, {0, 10}},
-    {Variables::DAMPING::MOT_03, {0, 10}},
-    {Variables::DAMPING::MOT_04, {0, 10}},
-    {Variables::DAMPING::MOT_05, {0, 10}},
-    {Variables::DAMPING::MOT_06, {0, 10}},
-    {Variables::DAMPING::MOT_07, {0, 10}},
-    {Variables::DAMPING::MOT_08, {0, 10}},
-    {Variables::DAMPING::MOT_09, {0, 10}},
-    {Variables::DAMPING::MOT_10, {0, 10}},
-    {Variables::DAMPING::MOT_11, {0, 10}},
-    {Variables::FRICTIONLOSS::MOT_00, {0, 10}},
-    {Variables::FRICTIONLOSS::MOT_01, {0, 10}},
-    {Variables::FRICTIONLOSS::MOT_02, {0, 10}},
-    {Variables::FRICTIONLOSS::MOT_03, {0, 10}},
-    {Variables::FRICTIONLOSS::MOT_04, {0, 10}},
-    {Variables::FRICTIONLOSS::MOT_05, {0, 10}},
-    {Variables::FRICTIONLOSS::MOT_06, {0, 10}},
-    {Variables::FRICTIONLOSS::MOT_07, {0, 10}},
-    {Variables::FRICTIONLOSS::MOT_08, {0, 10}},
-    {Variables::FRICTIONLOSS::MOT_09, {0, 10}},
-    {Variables::FRICTIONLOSS::MOT_10, {0, 10}},
-    {Variables::FRICTIONLOSS::MOT_11, {0, 10}},
-    {Variables::BEMF::MOT_00, {0, 0.5}},
-    {Variables::BEMF::MOT_01, {0, 0.5}},
-    {Variables::BEMF::MOT_02, {0, 0.5}},
-    {Variables::BEMF::MOT_03, {0, 0.5}},
-    {Variables::BEMF::MOT_04, {0, 0.5}},
-    {Variables::BEMF::MOT_05, {0, 0.5}},
-    {Variables::BEMF::MOT_06, {0, 0.5}},
-    {Variables::BEMF::MOT_07, {0, 0.5}},
-    {Variables::BEMF::MOT_08, {0, 0.5}},
-    {Variables::BEMF::MOT_09, {0, 0.5}},
-    {Variables::BEMF::MOT_10, {0, 0.5}},
-    {Variables::BEMF::MOT_11, {0, 0.5}},
-    {Variables::MASS::BODY_LINK, {9, 10}},
-    {Variables::MASS::RLEG_LINK0, {2, 3}},
-    {Variables::MASS::RLEG_LINK1, {1, 2}},
-    {Variables::MASS::RLEG_LINK2, {6, 7}},
-    {Variables::MASS::RLEG_LINK3, {2.8, 4}},
-    {Variables::MASS::RLEG_LINK4, {0.8, 2}},
-    {Variables::MASS::RLEG_LINK5, {1, 2}},
-    {Variables::MASS::LLEG_LINK0, {2, 3}},
-    {Variables::MASS::LLEG_LINK1, {1, 2}},
-    {Variables::MASS::LLEG_LINK2, {6, 7}},
-    {Variables::MASS::LLEG_LINK3, {2.8, 4}},
-    {Variables::MASS::LLEG_LINK4, {0.8, 2}},
-    {Variables::MASS::LLEG_LINK5, {1, 2}},
-    {Variables::MASS::CHEST_LINK2, {20, 28}},
-    {Variables::COM_POS::CHEST_LINK2_X, {-0.2, -0.1}},
-    {Variables::COM_POS::CHEST_LINK2_Y, {-0.05, 0.05}},
-    {Variables::COM_POS::CHEST_LINK2_Z, {0.2, 0.3}},
-  };
+  VariableBounds map;
+  for (int i = 0; i < static_cast<int>(Variables::DAMPING::MOT_11)+1; ++i)
+  {
+    Variables::DAMPING v = static_cast<Variables::DAMPING>(i);
+    map[v] = {0, 10};
+  }
+  for (int i = 0; i < static_cast<int>(Variables::FRICTIONLOSS::MOT_11)+1; ++i)
+  {
+    Variables::FRICTIONLOSS v = static_cast<Variables::FRICTIONLOSS>(i);
+    map[v] = {0, 10};
+  }
+  for (int i = 0; i < static_cast<int>(Variables::BEMF::MOT_11)+1; ++i)
+  {
+    Variables::BEMF v = static_cast<Variables::BEMF>(i);
+    map[v] = {0, 0.5};
+  }
+  map[Variables::MASS::BODY_LINK] = {9, 10};
+  map[Variables::MASS::RLEG_LINK0] = {2, 3};
+  map[Variables::MASS::RLEG_LINK1] = {1, 2};
+  map[Variables::MASS::RLEG_LINK2] = {6, 7};
+  map[Variables::MASS::RLEG_LINK3] = {2.8, 4};
+  map[Variables::MASS::RLEG_LINK4] = {0.8, 2};
+  map[Variables::MASS::RLEG_LINK5] = {1, 2};
+  map[Variables::MASS::LLEG_LINK0] = {2, 3};
+  map[Variables::MASS::LLEG_LINK1] = {1, 2};
+  map[Variables::MASS::LLEG_LINK2] = {6, 7};
+  map[Variables::MASS::LLEG_LINK3] = {2.8, 4};
+  map[Variables::MASS::LLEG_LINK4] = {0.8, 2};
+  map[Variables::MASS::LLEG_LINK5] = {1, 2};
+  map[Variables::MASS::CHEST_LINK2] = {20, 28};
+  map[Variables::COM_POS::CHEST_LINK2_X] = {-0.2, -0.1};
+  map[Variables::COM_POS::CHEST_LINK2_Y] = {-0.05, 0.05};
+  map[Variables::COM_POS::CHEST_LINK2_Z] = {0.2, 0.3};
+  return map;
 }
 
 /** Only the variables that appear in this array are considered for optimization */

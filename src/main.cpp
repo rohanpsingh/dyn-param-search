@@ -57,7 +57,7 @@ int main(int argc, char * argv[])
   optimizer::mute_mc_rtc();
 
   optimizer::set_main_robot(robot);
-  auto bounds = bounds_from_safety();
+  auto bounds = sanity_bounds();
 
   std::array<double, variables.size()> init = optimizer::get_x0();
   std::array<double, variables.size()> lbounds;
