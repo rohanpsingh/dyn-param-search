@@ -149,14 +149,37 @@ double run(const double * value)
 
     std::unique_lock<std::mutex> lock(MTX);
 
-    double score = 0;
+    std::vector<double> norms;
+    double ts = controller.timeStep;
     for (unsigned int i = 0; i < traj_data.size(); ++i)
     {
-      auto v1 = traj_data[i];
-      auto v2 = state_buffer[i];
-      score += (euclideanNorm(v1, v2));
+      auto p1 = traj_data[i];
+      auto p2 = state_buffer[i];
+      std::vector<double> v1, v2;
+      for (unsigned int j = 0; j < p1.size(); ++j)
+      {
+        double _v1 = 0;
+        double _v2 = 0;
+        if(i > 0)
+        {
+          _v1 = (traj_data[i][j] - traj_data[i-1][j])/ts;
+          _v2 = (state_buffer[i][j] - state_buffer[i-1][j])/ts;
+        }
+        v1.push_back(_v1);
+        v2.push_back(_v2);
+      }
+      std::vector<double> x(p1);
+      std::vector<double> y(p2);
+      x.insert(x.end(), v1.begin(), v1.end());
+      y.insert(y.end(), v2.begin(), v2.end());
+      norms.push_back(euclideanNorm(x, y));
     }
-    score /= traj_data.size();
+    double score = 0;
+    for (const auto & n : norms)
+    {
+      score += n;
+    }
+    score /= norms.size();
 
     std::cout << "Value: (";
     for (unsigned int i = 0; i < variables.size(); ++i)
@@ -169,16 +192,9 @@ double run(const double * value)
     {
       best_score = score;
       std::cout << "new best score: " << score << "\n";
-
       {
-        auto v1 = traj_data[traj_data.size()-1];
-        auto v2 = state_buffer[traj_data.size()-1];
-        for (unsigned int i = 0; i < v1.size(); ++i)
-        {
-          std::cout << i << ": " << v1[i] << "," << v2[i];
-          std::cout << "\t(diff=" << (v1[i] - v2[i]) << ")" << std::endl;
-        }
-        std::cout << "Norm:" << euclideanNorm(v1, v2) << std::endl;
+        unsigned int j = norms.size()-1;
+        std::cout << j << "------->Norm:" << norms[j] << std::endl;
       }
       std::cout << std::endl;
     }
