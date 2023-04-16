@@ -16,7 +16,7 @@ static inline const std::vector<std::string> mj_motor_names = {
   "RCY_motor", "RCR_motor", "RCP_motor", "RKP_motor", "RAP_motor", "RAR_motor",
   "LCY_motor", "LCR_motor", "LCP_motor", "LKP_motor", "LAP_motor", "LAR_motor",
 };
-static inline const std::vector<std::string> mj_dof_names = {
+static inline const std::vector<std::string> mj_jnt_names = {
   "RCY", "RCR", "RCP", "RKP", "RAP", "RAR",
   "LCY", "LCR", "LCP", "LKP", "LAP", "LAR",
 };
@@ -188,16 +188,18 @@ static inline void value_to_model(const double * value, mjModel & model)
   unsigned int k = 0;
   for (unsigned int i = 0; i < 12; ++i)
   {
-    std::string dof_name = robot_prefix + mj_dof_names[k];
-    unsigned int dof_id = mj_name2id(&model, mjOBJ_JOINT, dof_name.c_str());
+    std::string jnt_name = robot_prefix + mj_jnt_names[k];
+    unsigned int jnt_id = mj_name2id(&model, mjOBJ_JOINT, jnt_name.c_str());
+    unsigned int dof_id = model.jnt_dofadr[jnt_id];
     model.dof_damping[dof_id] = value[i];
     k++;
   }
   k = 0;
   for (unsigned int i = 12; i < 24; ++i)
   {
-    std::string dof_name = robot_prefix + mj_dof_names[k];
-    unsigned int dof_id = mj_name2id(&model, mjOBJ_JOINT, dof_name.c_str());
+    std::string jnt_name = robot_prefix + mj_jnt_names[k];
+    unsigned int jnt_id = mj_name2id(&model, mjOBJ_JOINT, jnt_name.c_str());
+    unsigned int dof_id = model.jnt_dofadr[jnt_id];
     model.dof_frictionloss[dof_id] = value[i];
     k++;
   }
