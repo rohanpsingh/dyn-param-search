@@ -80,7 +80,7 @@ int main(int argc, char * argv[])
     return 0;
   }
 
-  libcmaes::GenoPheno<libcmaes::pwqBoundStrategy> gp(lbounds.data(), ubounds.data(), variables.size());
+  libcmaes::GenoPheno<libcmaes::pwqBoundStrategy, libcmaes::linScalingStrategy> gp(lbounds.data(), ubounds.data(), variables.size());
   libcmaes::CMAParameters<decltype(gp)> cmaparams(init.size(), init.data(), sigma, lambda, 0, gp);
   // sets elitism: 0 -> no elitism 1 -> elitism: reinjects the best-ever seen solution 2 -> initial elitism: reinject x0
   // as long as it is not improved upon 3 -> initial elitism on restart: restart if best encountered solution is not the
