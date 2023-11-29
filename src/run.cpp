@@ -139,7 +139,7 @@ double run(const double * value)
     {
       if(state_buffer.size()!=traj_data.size())
       {
-        throw std::runtime_error("Trajectory data must have the same size");
+        throw std::runtime_error("Trajectory data must have the same size. (Parsed traj = " + std::to_string(traj_data.size()) + ". Collected traj size = " + std::to_string(state_buffer.size()) + ").");
       }
     }
     catch(std::exception const& e)
