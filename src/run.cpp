@@ -11,7 +11,7 @@ static std::mutex MTX;
 static std::string main_robot;
 static double best_score = std::numeric_limits<double>::infinity();
 
-bool render = false;
+static bool render;
 
 std::map<std::string, std::vector<double>> init_qs_;
 std::map<std::string, sva::PTransformd> init_pos_;
@@ -222,6 +222,11 @@ std::array<double, variables.size()> get_x0()
 void set_best_score(double s)
 {
   best_score = s;
+}
+
+void set_render()
+{
+  render = true;
 }
 
 void set_main_robot(const std::string & robot)

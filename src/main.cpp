@@ -24,6 +24,7 @@ int main(int argc, char * argv[])
   int lambda = -1;
   double sigma = 0.5;
   bool run_once = false;
+  bool render = false;
 
   boost::program_options::options_description desc("dyn-param-search options");
   // clang-format off
@@ -32,7 +33,8 @@ int main(int argc, char * argv[])
     ("robot", boost::program_options::value<std::string>(&robot)->required(), "Robot module")
     ("lambda", boost::program_options::value<int>(&lambda), "Lambda parameter (offspring per generation")
     ("sigma", boost::program_options::value<double>(&sigma), "Sigma parameter")
-    ("run-once", boost::program_options::bool_switch(&run_once), "Run once and exit");
+    ("run-once", boost::program_options::bool_switch(&run_once), "Run once and exit")
+    ("render", boost::program_options::bool_switch(&render), "Enable rendering");
   // clang-format on
 
   boost::program_options::variables_map vm;
@@ -58,6 +60,11 @@ int main(int argc, char * argv[])
 
   optimizer::set_main_robot(robot);
   auto bounds = sanity_bounds();
+
+  if (render)
+  {
+    optimizer::set_render();
+  }
 
   std::array<double, variables.size()> init = optimizer::get_x0();
   std::array<double, variables.size()> lbounds;
