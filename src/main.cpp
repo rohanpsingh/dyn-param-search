@@ -99,6 +99,7 @@ int main(int argc, char * argv[])
   libcmaes::FitFunc fit_fun = [](const double * x, const int) { return optimizer::run(x); };
   libcmaes::CMASolutions cmasols = libcmaes::cmaes<decltype(gp)>(fit_fun, cmaparams);
   Eigen::VectorXd params = gp.pheno(cmasols.get_best_seen_candidate().get_x_dvec());
+  std::cout << "Status message: " << cmasols.status_msg() << std::endl;
   std::cout << "Optimization time: " << cmasols.elapsed_time() / 1000.0 << " seconds\n";
   std::cout << "Evaluations: " << cmasols.fevals() << "\n";
   std::cout << "Final params: " << params.transpose() << std::endl;
