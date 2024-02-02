@@ -9,7 +9,7 @@ std::vector<std::vector<double>> parseTrajectoryFile(const std::string & path, c
   std::ifstream strm(path.c_str());
   if(!strm.is_open())
   {
-    std::cout << "Cannot open file at " << path << std::endl;
+    throw std::runtime_error("Cannot open file at " + path);
   }
 
   std::string line;
@@ -32,7 +32,8 @@ std::vector<std::vector<double>> parseTrajectoryFile(const std::string & path, c
     }
     if(row.size() != rowsize)
     {
-      std::cout << "Unexpected line size for trajectory data (Should be " << rowsize << ". Is " << row.size() << ")." << std::endl;
+      throw std::runtime_error("Unexpected line size (Should be "
+			       + std::to_string(rowsize) + ". Is " + std::to_string(row.size()) + ").");
     }
     data.push_back(row);
   }
