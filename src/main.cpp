@@ -21,6 +21,7 @@ int main(int argc, char * argv[])
   }
 
   std::string robot;
+  std::string joint;
   int lambda = -1;
   double sigma = 0.5;
   bool run_once = false;
@@ -31,6 +32,7 @@ int main(int argc, char * argv[])
   desc.add_options()
     ("help", "Display help message")
     ("robot", boost::program_options::value<std::string>(&robot)->required(), "Robot module")
+    ("joint", boost::program_options::value<std::string>(&joint)->required(), "Name of joint")
     ("lambda", boost::program_options::value<int>(&lambda), "Lambda parameter (offspring per generation")
     ("sigma", boost::program_options::value<double>(&sigma), "Sigma parameter")
     ("run-once", boost::program_options::bool_switch(&run_once), "Run once and exit")
@@ -58,7 +60,7 @@ int main(int argc, char * argv[])
 
   optimizer::mute_mc_rtc();
 
-  optimizer::set_main_robot(robot);
+  optimizer::set_main_robot(robot, joint);
   auto bounds = sanity_bounds();
 
   if (render)

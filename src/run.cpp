@@ -13,10 +13,23 @@ static double best_score = std::numeric_limits<double>::infinity();
 
 static bool render;
 
+static std::string joint_name;
+
 std::map<std::string, std::vector<double>> init_qs_;
 std::map<std::string, sva::PTransformd> init_pos_;
 
 std::vector<std::vector<double>> traj_data;
+
+
+std::string toLowerCase(const std::string& input)
+{
+  std::string result = input;
+  for (char& c : result) {
+    c = std::tolower(c);
+  }
+
+  return result;
+}
 
 static std::unique_ptr<mc_mujoco::MjSim> make_sim()
 {
@@ -32,11 +45,12 @@ static std::unique_ptr<mc_mujoco::MjSim> make_sim()
     config.add("IncludeHalfSitController", false);
     config.add("Log", false);
     config.add("GUIServer").add("Enable", false);
-    config.add("Enabled", "WalkerPolicy");
+    config.add("Enabled", "JointCalibController");
     config.save(temp_conf.string());
   }
 
   mc_mujoco::MjConfiguration mj_config;
+  mj_config.fix_base_link = true;
   if(!render)
   {
     mj_config.with_visualization = false;
@@ -47,10 +61,10 @@ static std::unique_ptr<mc_mujoco::MjSim> make_sim()
   boost::filesystem::remove(temp_conf);
 
   // parse trajectory file
-  const std::string path_to_traj = "/tmp/StateTrajectory.csv";
+  const std::string path_to_traj = "/tmp/real_" + joint_name + ".csv";
   try
   {
-    traj_data = parser::parseTrajectoryFile(path_to_traj, 12);
+    traj_data = parser::parseTrajectoryFile(path_to_traj, 1);
   } catch (const std::exception& e) {
     std::cerr << "Exception: " << e.what() << std::endl;
     std::terminate();
@@ -107,21 +121,23 @@ double run(const double * value)
     auto data = mj_sim->data();
 
     // set simulation parameters
-    value_to_model(value, model);
+    std::string mj_jnt_name = toLowerCase(main_robot) + "_" + joint_name;
+    value_to_model(mj_jnt_name, value, model);
 
     // Step once to start the controller
     mj_sim->stepSimulation();
+
+
+    // get motor mbc id
+    int mbc_idx = controller.robot().jointIndexByName(joint_name);
 
     double wallclock = 0;
     bool done = false;
     int counter = 0;
     std::vector<std::vector<double>> state_buffer;
+
     while(!done)
     {
-      if(controller.datastore().has("AUTOPLAY_FINISH"))
-      {
-        done = controller.datastore().get<bool>("AUTOPLAY_FINISH");
-      }
       if (render && (counter % 20)==0)
       {
         mj_sim->updateScene();
@@ -129,16 +145,15 @@ double run(const double * value)
       }
       mj_sim->stepSimulation();
 
-      if(controller.datastore().has("AUTOPLAY_FINISH") && ((counter+1)%2==0))
+      if((counter)%5==0)
       {
-        auto v = controller.datastore().get<std::vector<double>>("AUTOPLAY_BUFFER");
-        if (v.size())
-        {
-          state_buffer.push_back(v);
-        }
+	std::vector<double> v = controller.realRobot().mbc().q[mbc_idx];
+	state_buffer.push_back(v);
       }
       wallclock += model.opt.timestep;
       counter++;
+
+      done = (state_buffer.size() >= traj_data.size());
     }
 
     try
@@ -155,37 +170,17 @@ double run(const double * value)
 
     std::unique_lock<std::mutex> lock(MTX);
 
-    std::vector<double> norms;
-    double ts = controller.timeStep;
-    for (unsigned int i = 0; i < traj_data.size(); ++i)
+    std::vector<double> p1;
+    std::vector<double> p2;
+    for (const auto& v : traj_data)
     {
-      auto p1 = traj_data[i];
-      auto p2 = state_buffer[i];
-      std::vector<double> v1, v2;
-      for (unsigned int j = 0; j < p1.size(); ++j)
-      {
-        double _v1 = 0;
-        double _v2 = 0;
-        if(i > 0)
-        {
-          _v1 = (traj_data[i][j] - traj_data[i-1][j])/ts;
-          _v2 = (state_buffer[i][j] - state_buffer[i-1][j])/ts;
-        }
-        v1.push_back(_v1);
-        v2.push_back(_v2);
-      }
-      std::vector<double> x(p1);
-      std::vector<double> y(p2);
-      x.insert(x.end(), v1.begin(), v1.end());
-      y.insert(y.end(), v2.begin(), v2.end());
-      norms.push_back(euclideanNorm(x, y));
+      p1.push_back(v[0]);
     }
-    double score = 0;
-    for (const auto & n : norms)
+    for (const auto& v : state_buffer)
     {
-      score += n;
+      p2.push_back(v[0]);
     }
-    score /= norms.size();
+    double score = euclideanNorm(p1, p2);
 
     std::cout << "Value: (";
     for (unsigned int i = 0; i < variables.size(); ++i)
@@ -198,10 +193,6 @@ double run(const double * value)
     {
       best_score = score;
       std::cout << "new best score: " << score << "\n";
-      {
-        unsigned int j = norms.size()-1;
-        std::cout << j << "------->Norm:" << norms[j] << std::endl;
-      }
       std::cout << std::endl;
     }
     lock.unlock();
@@ -221,7 +212,9 @@ std::array<double, variables.size()> get_x0()
   std::array<double, variables.size()> x0;
   auto mj_sim = get_sim();
   auto model = mj_sim->model();
-  model_to_value(model, x0.data());
+
+  std::string mj_jnt_name = toLowerCase(main_robot) + "_" + joint_name;
+  model_to_value(mj_jnt_name, model, x0.data());
   return x0;
 }
 
@@ -235,9 +228,10 @@ void set_render()
   render = true;
 }
 
-void set_main_robot(const std::string & robot)
+void set_main_robot(const std::string & robot, const std::string & joint)
 {
   main_robot = robot;
+  joint_name = joint;
 }
 
 void mute_mc_rtc()

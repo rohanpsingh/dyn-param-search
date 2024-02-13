@@ -1,6 +1,6 @@
 #pragma once
 
-#include "variables.h"
+#include "single_joint_variables.h"
 #include "parser.h"
 
 #include <cmath>
@@ -21,7 +21,7 @@ void set_best_score(double s);
 void set_render();
 
 /** Set the main robot used in the run function */
-void set_main_robot(const std::string & robot);
+void set_main_robot(const std::string & robot, const std::string & joint);
 
 /** Mute all mc_rtc outputs */
 void mute_mc_rtc();
