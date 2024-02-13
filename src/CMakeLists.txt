@@ -2,6 +2,7 @@ set(run_sources
   run.cpp
   run.h
   variables.h
+  single_joint_variables.h
   parser.cpp
   parser.h
 )
