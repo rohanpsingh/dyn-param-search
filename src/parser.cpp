@@ -11,6 +11,10 @@ std::vector<std::vector<double>> parseTrajectoryFile(const std::string & path, c
   {
     throw std::runtime_error("Cannot open file at " + path);
   }
+  else
+  {
+    std::cout << "Reading file at " << path << std::endl;
+  }
 
   std::string line;
   while (std::getline(strm, line))
